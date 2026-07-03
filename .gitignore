@@ -1,0 +1,7 @@
+.env
+vendor/
+composer.lock
+.gemini/
+.agents/
+.vscode/
+/documents
