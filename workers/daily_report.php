@@ -18,6 +18,15 @@ echo "[" . date('Y-m-d H:i:s') . "] Starting Automated Daily Report generator...
 try {
     $pdo = getDBConnection();
     
+    // Check if daily report email trigger is enabled
+    $stmtTrigger = $pdo->prepare("SELECT setting_value FROM system_settings WHERE setting_key = 'email_trigger_daily_report'");
+    $stmtTrigger->execute();
+    $dailyReportTrigger = $stmtTrigger->fetchColumn();
+    if ($dailyReportTrigger === '0') {
+        echo "Daily report email notification is disabled in settings. Skipping report.\n";
+        exit(0);
+    }
+    
     // Fetch target email
     $stmtEmail = $pdo->prepare("SELECT setting_value FROM system_settings WHERE setting_key = 'alert_target_email'");
     $stmtEmail->execute();

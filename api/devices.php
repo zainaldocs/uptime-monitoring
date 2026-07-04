@@ -137,6 +137,59 @@ try {
             
             echo json_encode(['success' => true, 'message' => 'Perangkat berhasil dihapus.']);
             exit();
+            
+        } elseif ($action === 'bulk_delete') {
+            $ids = $_POST['ids'] ?? [];
+            
+            if (empty($ids) || !is_array($ids)) {
+                echo json_encode(['success' => false, 'error' => 'Tidak ada perangkat yang dipilih.']);
+                exit();
+            }
+            
+            $cleanIds = array_filter(array_map('intval', $ids));
+            if (empty($cleanIds)) {
+                echo json_encode(['success' => false, 'error' => 'ID perangkat tidak valid.']);
+                exit();
+            }
+            
+            $placeholders = implode(',', array_fill(0, count($cleanIds), '?'));
+            $stmt = $pdo->prepare("DELETE FROM devices WHERE id IN ($placeholders)");
+            $stmt->execute($cleanIds);
+            
+            echo json_encode(['success' => true, 'message' => count($cleanIds) . ' perangkat berhasil dihapus.']);
+            exit();
+            
+        } elseif ($action === 'bulk_update_group') {
+            $ids = $_POST['ids'] ?? [];
+            $group_id = $_POST['group_id'] === 'none' ? null : ($_POST['group_id'] === '' ? null : intval($_POST['group_id']));
+            
+            if (empty($ids) || !is_array($ids)) {
+                echo json_encode(['success' => false, 'error' => 'Tidak ada perangkat yang dipilih.']);
+                exit();
+            }
+            
+            $cleanIds = array_filter(array_map('intval', $ids));
+            if (empty($cleanIds)) {
+                echo json_encode(['success' => false, 'error' => 'ID perangkat tidak valid.']);
+                exit();
+            }
+            
+            if ($group_id !== null) {
+                $chkGroup = $pdo->prepare("SELECT id FROM `groups` WHERE id = ?");
+                $chkGroup->execute([$group_id]);
+                if (!$chkGroup->fetch()) {
+                    echo json_encode(['success' => false, 'error' => 'Grup tujuan tidak valid.']);
+                    exit();
+                }
+            }
+            
+            $placeholders = implode(',', array_fill(0, count($cleanIds), '?'));
+            $stmt = $pdo->prepare("UPDATE devices SET group_id = ? WHERE id IN ($placeholders)");
+            $params = array_merge([$group_id], $cleanIds);
+            $stmt->execute($params);
+            
+            echo json_encode(['success' => true, 'message' => count($cleanIds) . ' perangkat berhasil dipindahkan grup.']);
+            exit();
         }
     }
     

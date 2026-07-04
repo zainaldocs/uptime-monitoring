@@ -5,6 +5,7 @@
 let groupsData = [];
 let searchFilter = '';
 let statusFilter = 'ALL';
+let groupFilter = 'ALL';
 let isPaused = false;
 let countdownTime = 15;
 let countdownTimer = null;
@@ -29,6 +30,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (filterStatus) {
         filterStatus.addEventListener('change', (e) => {
             statusFilter = e.target.value;
+            currentPage = 1; // Reset to first page on filter change
+            renderDashboard();
+        });
+    }
+
+    const filterGroup = document.getElementById('filterGroup');
+    if (filterGroup) {
+        filterGroup.addEventListener('change', (e) => {
+            groupFilter = e.target.value;
             currentPage = 1; // Reset to first page on filter change
             renderDashboard();
         });
@@ -118,6 +128,7 @@ async function fetchLiveStatus() {
         
         if (result.success) {
             groupsData = result.groups;
+            populateGroupFilter();
             renderDashboard();
             updateStatistics();
         } else {
@@ -125,6 +136,33 @@ async function fetchLiveStatus() {
         }
     } catch (err) {
         console.error("Connection error loading status:", err);
+    }
+}
+
+/**
+ * Populates Group Filter dropdown dynamically.
+ */
+function populateGroupFilter() {
+    const filterGroup = document.getElementById('filterGroup');
+    if (!filterGroup) return;
+    
+    const currentValue = filterGroup.value || 'ALL';
+    
+    let options = '<option value="ALL">Semua Grup</option>';
+    
+    // Sort groups by name
+    const sortedGroups = [...groupsData].sort((a, b) => a.group_name.localeCompare(b.group_name));
+    
+    sortedGroups.forEach(group => {
+        options += `<option value="${group.group_name}">${escapeHtml(group.group_name)}</option>`;
+    });
+    
+    filterGroup.innerHTML = options;
+    filterGroup.value = currentValue;
+    
+    if (filterGroup.value !== currentValue) {
+        filterGroup.value = 'ALL';
+        groupFilter = 'ALL';
     }
 }
 
@@ -189,13 +227,14 @@ function renderDashboard() {
         });
     });
     
-    // 2. Filter devices based on Search query & Status filter
+    // 2. Filter devices based on Search query, Status filter & Group filter
     const filteredDevices = allDevices.filter(device => {
         const matchesSearch = device.name.toLowerCase().includes(searchFilter) || 
                               device.ip_address.toLowerCase().includes(searchFilter) ||
                               device.group_name.toLowerCase().includes(searchFilter);
         const matchesStatus = statusFilter === 'ALL' || device.status === statusFilter;
-        return matchesSearch && matchesStatus;
+        const matchesGroup = groupFilter === 'ALL' || device.group_name === groupFilter;
+        return matchesSearch && matchesStatus && matchesGroup;
     });
     
     const totalItems = filteredDevices.length;
@@ -259,12 +298,45 @@ function renderDashboard() {
         `;
         
         return `
-            <tr class="hover:bg-gray-50/55 dark:hover:bg-gray-800/30 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-500 dark:text-gray-400">${escapeHtml(device.group_name)}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800 dark:text-white">${escapeHtml(device.name)}${checkTypeFormatted}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500 dark:text-gray-400">${escapeHtml(device.ip_address)}${portSuffix}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">${statusBadge}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700 dark:text-gray-300">
+            <tr class="flex flex-col md:table-row hover:bg-gray-50/55 dark:hover:bg-gray-800/30 transition-colors p-4 mb-4 bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-150 dark:border-gray-800 md:p-0 md:mb-0 md:border-none">
+                <!-- Baris 1 di Mobile: Nama (Kiri) & Status Badge (Kanan) -->
+                <td class="px-0 py-1 md:px-6 md:py-4 whitespace-nowrap block md:table-cell">
+                    <div class="flex items-center justify-between md:contents">
+                        <span class="text-sm font-bold text-gray-800 dark:text-white md:hidden">${escapeHtml(device.name)}${checkTypeFormatted}</span>
+                        <div class="md:hidden">${statusBadge}</div>
+                        <!-- Desktop Only -->
+                        <span class="hidden md:inline text-sm font-bold text-gray-500 dark:text-gray-400">${escapeHtml(device.group_name)}</span>
+                    </div>
+                </td>
+                <!-- Baris 2 di Mobile: Grup (Kiri) & Durasi (Kanan) -->
+                <td class="px-0 py-1 md:px-6 md:py-4 whitespace-nowrap block md:table-cell">
+                    <div class="flex items-center justify-between md:contents">
+                        <span class="text-xs text-gray-500 dark:text-gray-400 md:hidden flex items-center gap-1.5">
+                            <i class="fa-solid fa-folder text-gray-400 text-[10px]"></i>
+                            ${escapeHtml(device.group_name)}
+                        </span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400 md:hidden flex items-center gap-1.5">
+                            <i class="fa-regular fa-clock text-gray-400 text-[10px]"></i>
+                            ${device.duration_text}
+                        </span>
+                        <!-- Desktop Only -->
+                        <span class="hidden md:inline text-sm font-bold text-gray-800 dark:text-white">${escapeHtml(device.name)}${checkTypeFormatted}</span>
+                    </div>
+                </td>
+                <!-- Baris 3 di Mobile: IP / Host (Kiri) -->
+                <td class="px-0 py-1 md:px-6 md:py-4 whitespace-nowrap block md:table-cell">
+                    <div class="flex items-center justify-between md:contents">
+                        <span class="text-xs font-mono text-gray-500 dark:text-gray-400 md:hidden flex items-center gap-1.5">
+                            <i class="fa-solid fa-link text-gray-400 text-[10px]"></i>
+                            ${escapeHtml(device.ip_address)}${portSuffix}
+                        </span>
+                        <!-- Desktop Only -->
+                        <span class="hidden md:inline text-sm font-mono text-gray-500 dark:text-gray-400">${escapeHtml(device.ip_address)}${portSuffix}</span>
+                    </div>
+                </td>
+                <!-- Desktop Only columns -->
+                <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm">${statusBadge}</td>
+                <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700 dark:text-gray-300">
                     <i class="fa-regular fa-clock text-[10px] mr-1.5 text-gray-400"></i>${device.duration_text}
                 </td>
             </tr>

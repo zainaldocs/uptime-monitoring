@@ -30,47 +30,47 @@ require_once __DIR__ . '/layout/header.php';
 <!-- Statistics Cards -->
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
     <!-- Stat 1: Total Devices -->
-    <div class="bg-white dark:bg-[#1e293b] p-5 rounded-2xl border border-gray-150 dark:border-gray-800 shadow-sm flex items-center gap-4">
-        <div class="p-3.5 bg-blue-500/10 text-blue-500 rounded-xl">
-            <i class="fa-solid fa-server text-xl md:text-2xl"></i>
+    <div class="bg-white dark:bg-[#1e293b] p-4 sm:p-5 rounded-2xl border border-gray-150 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+        <div class="p-2.5 sm:p-3.5 bg-blue-500/10 text-blue-500 rounded-xl flex-shrink-0">
+            <i class="fa-solid fa-server text-lg sm:text-xl md:text-2xl"></i>
         </div>
         <div>
-            <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Total Device</span>
-            <h3 id="statTotal" class="text-2xl font-bold mt-0.5">-</h3>
+            <span class="text-[10px] sm:text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">Total Device</span>
+            <h3 id="statTotal" class="text-xl sm:text-2xl font-bold mt-0.5">-</h3>
         </div>
     </div>
     
     <!-- Stat 2: Active (UP) -->
-    <div class="bg-white dark:bg-[#1e293b] p-5 rounded-2xl border border-gray-150 dark:border-gray-800 shadow-sm flex items-center gap-4">
-        <div class="p-3.5 bg-emerald-500/10 text-emerald-500 rounded-xl">
-            <i class="fa-solid fa-circle-check text-xl md:text-2xl"></i>
+    <div class="bg-white dark:bg-[#1e293b] p-4 sm:p-5 rounded-2xl border border-gray-150 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+        <div class="p-2.5 sm:p-3.5 bg-emerald-500/10 text-emerald-500 rounded-xl flex-shrink-0">
+            <i class="fa-solid fa-circle-check text-lg sm:text-xl md:text-2xl"></i>
         </div>
         <div>
-            <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Perangkat UP</span>
-            <h3 id="statUp" class="text-2xl font-bold mt-0.5 text-emerald-500">-</h3>
+            <span class="text-[10px] sm:text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">Perangkat UP</span>
+            <h3 id="statUp" class="text-xl sm:text-2xl font-bold mt-0.5 text-emerald-500">-</h3>
         </div>
     </div>
     
     <!-- Stat 3: Offline (DOWN) -->
-    <div class="bg-white dark:bg-[#1e293b] p-5 rounded-2xl border border-gray-150 dark:border-gray-800 shadow-sm flex items-center gap-4">
-        <div class="p-3.5 bg-red-500/10 text-red-500 rounded-xl">
-            <i class="fa-solid fa-triangle-exclamation text-xl md:text-2xl"></i>
+    <div class="bg-white dark:bg-[#1e293b] p-4 sm:p-5 rounded-2xl border border-gray-150 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+        <div class="p-2.5 sm:p-3.5 bg-red-500/10 text-red-500 rounded-xl flex-shrink-0">
+            <i class="fa-solid fa-triangle-exclamation text-lg sm:text-xl md:text-2xl"></i>
         </div>
         <div>
-            <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Perangkat DOWN</span>
-            <h3 id="statDown" class="text-2xl font-bold mt-0.5 text-red-500">-</h3>
+            <span class="text-[10px] sm:text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">Perangkat DOWN</span>
+            <h3 id="statDown" class="text-xl sm:text-2xl font-bold mt-0.5 text-red-500">-</h3>
         </div>
     </div>
     
     <!-- Stat 4: Average Uptime -->
-    <div class="bg-white dark:bg-[#1e293b] p-5 rounded-2xl border border-gray-150 dark:border-gray-800 shadow-sm flex flex-col justify-between">
-        <div class="flex items-center gap-4">
-            <div class="p-3.5 bg-indigo-500/10 text-indigo-500 rounded-xl">
-                <i class="fa-solid fa-chart-pie text-xl md:text-2xl"></i>
+    <div class="bg-white dark:bg-[#1e293b] p-4 sm:p-5 rounded-2xl border border-gray-150 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <div class="p-2.5 sm:p-3.5 bg-indigo-500/10 text-indigo-500 rounded-xl flex-shrink-0">
+                <i class="fa-solid fa-chart-pie text-lg sm:text-xl md:text-2xl"></i>
             </div>
             <div>
-                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Persentase Uptime</span>
-                <h3 id="statUptime" class="text-2xl font-bold mt-0.5 text-indigo-500">-</h3>
+                <span class="text-[10px] sm:text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">Persentase Uptime</span>
+                <h3 id="statUptime" class="text-xl sm:text-2xl font-bold mt-0.5 text-indigo-500">-</h3>
             </div>
         </div>
         <!-- Progress Bar -->
@@ -93,22 +93,31 @@ require_once __DIR__ . '/layout/header.php';
     </div>
     
     <!-- Filter Options -->
-    <div class="flex items-center gap-3">
-        <label for="filterStatus" class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 hidden sm:block">Filter Status</label>
-        <select id="filterStatus"
-                class="px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-            <option value="ALL">Semua Perangkat</option>
-            <option value="UP">Hanya UP</option>
-            <option value="DOWN">Hanya DOWN</option>
-        </select>
+    <div class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-2">
+            <label for="filterGroup" class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 hidden sm:block">Grup</label>
+            <select id="filterGroup"
+                    class="px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                <option value="ALL">Semua Grup</option>
+            </select>
+        </div>
+        <div class="flex items-center gap-2">
+            <label for="filterStatus" class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 hidden sm:block">Status</label>
+            <select id="filterStatus"
+                    class="px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                <option value="ALL">Semua Status</option>
+                <option value="UP">Hanya UP</option>
+                <option value="DOWN">Hanya DOWN</option>
+            </select>
+        </div>
     </div>
 </div>
 
 <!-- Table Container for Devices Monitoring -->
 <div class="bg-white dark:bg-[#1e293b] rounded-2xl shadow-xl border border-gray-150 dark:border-gray-800 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-            <thead class="bg-gray-50 dark:bg-gray-900/50">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 block md:table">
+            <thead class="bg-gray-50 dark:bg-gray-900/50 hidden md:table-header-group">
                 <tr>
                     <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Grup</th>
                     <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Nama Perangkat</th>
@@ -117,10 +126,10 @@ require_once __DIR__ . '/layout/header.php';
                     <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Durasi Status</th>
                 </tr>
             </thead>
-            <tbody id="dashboardTableBody" class="divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody id="dashboardTableBody" class="divide-y divide-gray-200 dark:divide-gray-800 block md:table-row-group">
                 <!-- Loading State -->
-                <tr>
-                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                <tr class="block md:table-row">
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-500 block md:table-cell">
                         <div class="flex justify-center items-center gap-3">
                             <i class="fa-solid fa-circle-notch fa-spin text-blue-500 text-lg"></i>
                             <span>Memuat modul pemantauan real-time...</span>

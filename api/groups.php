@@ -94,6 +94,27 @@ try {
             
             echo json_encode(['success' => true, 'message' => 'Grup berhasil dihapus.']);
             exit();
+            
+        } elseif ($action === 'bulk_delete') {
+            $ids = $_POST['ids'] ?? [];
+            
+            if (empty($ids) || !is_array($ids)) {
+                echo json_encode(['success' => false, 'error' => 'Tidak ada grup yang dipilih.']);
+                exit();
+            }
+            
+            $cleanIds = array_filter(array_map('intval', $ids));
+            if (empty($cleanIds)) {
+                echo json_encode(['success' => false, 'error' => 'ID grup tidak valid.']);
+                exit();
+            }
+            
+            $placeholders = implode(',', array_fill(0, count($cleanIds), '?'));
+            $stmt = $pdo->prepare("DELETE FROM `groups` WHERE id IN ($placeholders)");
+            $stmt->execute($cleanIds);
+            
+            echo json_encode(['success' => true, 'message' => count($cleanIds) . ' grup berhasil dihapus.']);
+            exit();
         }
     }
     

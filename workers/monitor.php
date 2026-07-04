@@ -22,6 +22,15 @@ try {
     $stmt = $pdo->query("SELECT * FROM devices");
     $devices = $stmt->fetchAll();
     
+    // Fetch settings for email triggers
+    $settingsStmt = $pdo->query("SELECT setting_key, setting_value FROM system_settings");
+    $settings = [];
+    while ($row = $settingsStmt->fetch()) {
+        $settings[$row['setting_key']] = $row['setting_value'];
+    }
+    $email_trigger_down = $settings['email_trigger_down'] ?? '1';
+    $email_trigger_up = $settings['email_trigger_up'] ?? '1';
+    
     if (empty($devices)) {
         echo "No devices registered for monitoring.\n";
         exit();
@@ -54,13 +63,33 @@ try {
             
             // Trigger instant email alert on UP -> DOWN transition
             if ($oldStatus === 'UP' && $newStatus === 'DOWN') {
-                $mailerPath = __DIR__ . '/../includes/mailer.php';
-                if (file_exists($mailerPath)) {
-                    require_once $mailerPath;
-                    if (function_exists('sendAlertEmail')) {
-                        echo "Triggering SMTP Alert for '$deviceName'...\n";
-                        sendAlertEmail($device, $latency);
+                if ($email_trigger_down === '1') {
+                    $mailerPath = __DIR__ . '/../includes/mailer.php';
+                    if (file_exists($mailerPath)) {
+                        require_once $mailerPath;
+                        if (function_exists('sendAlertEmail')) {
+                            echo "Triggering SMTP Alert for '$deviceName'...\n";
+                            sendAlertEmail($device, $latency);
+                        }
                     }
+                } else {
+                    echo "SMTP Alert for '$deviceName' is skipped (disabled in settings).\n";
+                }
+            }
+            
+            // Trigger instant email recovery on DOWN -> UP transition
+            if ($oldStatus === 'DOWN' && $newStatus === 'UP') {
+                if ($email_trigger_up === '1') {
+                    $mailerPath = __DIR__ . '/../includes/mailer.php';
+                    if (file_exists($mailerPath)) {
+                        require_once $mailerPath;
+                        if (function_exists('sendRecoveryEmail')) {
+                            echo "Triggering SMTP Recovery for '$deviceName'...\n";
+                            sendRecoveryEmail($device, $latency);
+                        }
+                    }
+                } else {
+                    echo "SMTP Recovery for '$deviceName' is skipped (disabled in settings).\n";
                 }
             }
         }

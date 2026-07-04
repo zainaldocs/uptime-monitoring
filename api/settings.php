@@ -38,13 +38,20 @@ try {
                 exit();
             }
             
+            $email_trigger_down = isset($_POST['email_trigger_down']) ? '1' : '0';
+            $email_trigger_up = isset($_POST['email_trigger_up']) ? '1' : '0';
+            $email_trigger_daily_report = isset($_POST['email_trigger_daily_report']) ? '1' : '0';
+            
             // Save or Update settings
             $settings = [
                 'smtp_host' => $smtp_host,
                 'smtp_port' => $smtp_port,
                 'smtp_auth' => $smtp_auth,
                 'smtp_user' => $smtp_user,
-                'alert_target_email' => $alert_target_email
+                'alert_target_email' => $alert_target_email,
+                'email_trigger_down' => $email_trigger_down,
+                'email_trigger_up' => $email_trigger_up,
+                'email_trigger_daily_report' => $email_trigger_daily_report
             ];
             
             // Only update password if not empty (prevent overwriting with blank)
