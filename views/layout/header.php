@@ -72,7 +72,7 @@ function isActive(string $page, string $currentScript): string {
     <meta name="csrf-token" content="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
     
     <!-- Global JavaScript Utils -->
-    <script src="<?php echo $baseUrl; ?>assets/js/utils.js"></script>
+    <script src="<?php echo $baseUrl; ?>assets/js/utils.js?v=1.0.1"></script>
 
     <style>
         /* Custom Scrollbar */
