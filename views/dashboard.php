@@ -147,7 +147,7 @@ require_once __DIR__ . '/layout/header.php';
 </div>
 
 <!-- Dashboard Javascript module link -->
-<script src="<?php echo $baseUrl; ?>assets/js/dashboard.js"></script>
+<script src="<?php echo $baseUrl; ?>assets/js/dashboard.js?v=1.0.1"></script>
 
 <?php
 require_once __DIR__ . '/layout/footer.php';
