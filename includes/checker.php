@@ -62,6 +62,18 @@ function probePing(string $ip): array {
     
     // Status is UP if command returned exit code 0
     if ($resultCode === 0) {
+        $outputStr = implode("\n", $output);
+        // Detect Windows fake success (Destination host unreachable / Request timed out / General failure)
+        if (stripos($outputStr, 'unreachable') !== false || 
+            stripos($outputStr, 'tidak dapat dijangkau') !== false || 
+            stripos($outputStr, 'timed out') !== false || 
+            stripos($outputStr, 'failure') !== false) {
+            return [
+                'status' => 'DOWN',
+                'latency' => null
+            ];
+        }
+        
         // Attempt to parse actual latency from output for better precision
         $parsedLatency = parsePingLatency($output, $isWin);
         return [

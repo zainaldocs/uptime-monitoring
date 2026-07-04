@@ -23,6 +23,9 @@ $smtp_auth = $settings['smtp_auth'] ?? 'true';
 $smtp_user = $settings['smtp_user'] ?? '';
 $alert_email = $settings['alert_target_email'] ?? '';
 $theme_mode = $settings['theme_mode'] ?? 'dark';
+$email_trigger_down = $settings['email_trigger_down'] ?? '1';
+$email_trigger_up = $settings['email_trigger_up'] ?? '1';
+$email_trigger_daily_report = $settings['email_trigger_daily_report'] ?? '1';
 ?>
 
 <!-- Content Header -->
@@ -91,6 +94,29 @@ $theme_mode = $settings['theme_mode'] ?? 'dark';
                     <input type="email" id="alert_target_email" name="alert_target_email" value="<?php echo htmlspecialchars($alert_email); ?>" required
                            class="block w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                            placeholder="target@example.com">
+                </div>
+                
+                <!-- Email Triggers -->
+                <div class="space-y-2 pt-2 border-t border-gray-150 dark:border-gray-800">
+                    <span class="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Pemicu Notifikasi Email</span>
+                    
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" name="email_trigger_down" value="1" <?php echo $email_trigger_down === '1' ? 'checked' : ''; ?>
+                               class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-800 dark:bg-gray-900">
+                        <span class="text-xs text-gray-600 dark:text-gray-300">Kirim email saat perangkat <b>DOWN</b></span>
+                    </label>
+
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" name="email_trigger_up" value="1" <?php echo $email_trigger_up === '1' ? 'checked' : ''; ?>
+                               class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-800 dark:bg-gray-900">
+                        <span class="text-xs text-gray-600 dark:text-gray-300">Kirim email saat perangkat kembali <b>UP (Online)</b></span>
+                    </label>
+
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" name="email_trigger_daily_report" value="1" <?php echo $email_trigger_daily_report === '1' ? 'checked' : ''; ?>
+                               class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-800 dark:bg-gray-900">
+                        <span class="text-xs text-gray-600 dark:text-gray-300">Kirim <b>laporan harian</b> otomatis</span>
+                    </label>
                 </div>
                 
                 <div class="flex gap-3">

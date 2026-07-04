@@ -284,6 +284,9 @@ INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`) VALUES ('4'
 INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`) VALUES ('5', 'smtp_pass', 'vmzj hyls jfar hirp');
 INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`) VALUES ('6', 'alert_target_email', 'nal.zainalarifin@gmail.com');
 INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`) VALUES ('7', 'theme_mode', 'light');
+INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`) VALUES ('8', 'email_trigger_down', '1');
+INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`) VALUES ('9', 'email_trigger_up', '1');
+INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`) VALUES ('10', 'email_trigger_daily_report', '1');
 
 -- --------------------------------------------------------
 -- Table structure for table `users`

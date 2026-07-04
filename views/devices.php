@@ -25,12 +25,37 @@ require_once __DIR__ . '/layout/header.php';
 <!-- Alert Placeholder -->
 <div id="alertContainer" class="hidden mb-6 p-4 rounded-xl text-sm border flex items-center gap-3 transition-all duration-300"></div>
 
+<!-- Bulk Actions Bar -->
+<div id="bulkActionsBar" class="hidden mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-150 dark:border-gray-800 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
+    <span class="text-sm font-medium text-gray-600 dark:text-gray-300">
+        <i class="fa-solid fa-circle-check text-blue-500 mr-2"></i> <span id="selectedCount">0</span> perangkat terpilih
+    </span>
+    <div class="flex items-center gap-3">
+        <!-- Pindah Grup Dropdown -->
+        <select id="bulkGroupSelect" class="px-3 py-1.5 bg-white dark:bg-gray-850 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="">-- Pindahkan ke Grup --</option>
+            <option value="none">Tanpa Grup</option>
+            <!-- Populated dynamically via populateGroupSelect() -->
+        </select>
+        <button onclick="executeBulkUpdateGroup()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-xs transition-colors shadow-sm">
+            Terapkan
+        </button>
+        <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+        <button onclick="confirmBulkDelete()" class="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl text-xs transition-colors flex items-center gap-2 shadow-sm shadow-red-500/10">
+            <i class="fa-solid fa-trash-can text-xs"></i> Hapus
+        </button>
+    </div>
+</div>
+
 <!-- Devices Table Container -->
 <div class="bg-white dark:bg-[#1e293b] rounded-2xl shadow-xl border border-gray-150 dark:border-gray-800 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-            <thead class="bg-gray-50 dark:bg-gray-900/50">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 block md:table">
+            <thead class="bg-gray-50 dark:bg-gray-900/50 hidden md:table-header-group">
                 <tr>
+                    <th scope="col" class="px-6 py-4 text-left w-10">
+                        <input type="checkbox" id="selectAllDevices" onchange="toggleSelectAllDevices(this)" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-800 dark:bg-gray-900">
+                    </th>
                     <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Nama Perangkat</th>
                     <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Grup</th>
                     <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Alamat Host / IP</th>
@@ -39,10 +64,10 @@ require_once __DIR__ . '/layout/header.php';
                     <th scope="col" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">Aksi</th>
                 </tr>
             </thead>
-            <tbody id="devicesTableBody" class="divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody id="devicesTableBody" class="divide-y divide-gray-200 dark:divide-gray-800 block md:table-row-group">
                 <!-- Data will be populated via Fetch API -->
-                <tr id="loadingRow">
-                    <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                <tr id="loadingRow" class="block md:table-row">
+                    <td colspan="7" class="px-6 py-10 text-center text-gray-500 block md:table-cell">
                         <div class="flex justify-center items-center gap-3">
                             <i class="fa-solid fa-circle-notch fa-spin text-blue-500 text-lg"></i>
                             <span>Memuat data perangkat...</span>
@@ -170,6 +195,22 @@ require_once __DIR__ . '/layout/header.php';
     </div>
 </div>
 
+<!-- Modal Konfirmasi Hapus Massal -->
+<div id="bulkDeleteModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-gray-950/50 backdrop-blur-sm transition-opacity">
+    <div class="bg-white dark:bg-[#1e293b] w-full max-w-sm rounded-2xl shadow-2xl border border-gray-150 dark:border-gray-800 p-6 text-center transform scale-95 transition-transform">
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 mb-4 shadow-sm">
+            <i class="fa-solid fa-trash-can text-lg animate-pulse"></i>
+        </div>
+        <h3 class="text-lg font-bold text-gray-950 dark:text-white mb-2">Hapus Perangkat Terpilih?</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Tindakan ini tidak dapat dibatalkan. Semua perangkat yang dipilih dan seluruh riwayat log ketersediaannya akan dihapus secara permanen.</p>
+        
+        <div class="flex justify-center gap-3">
+            <button onclick="closeBulkDeleteModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-sm font-medium rounded-xl transition-colors">Batal</button>
+            <button id="confirmBulkDeleteBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl transition-colors">Hapus Semua</button>
+        </div>
+    </div>
+</div>
+
 <!-- JS Logic for Devices Management -->
 <script>
     let devicesData = [];
@@ -178,12 +219,11 @@ require_once __DIR__ . '/layout/header.php';
     let modalMode = 'create'; // 'create' or 'update'
     let currentPage = 1;
     const itemsPerPage = 10;
+    let selectedDevices = new Set();
 
     document.addEventListener("DOMContentLoaded", () => {
         loadData();
     });
-
-
 
     // Toggle Port styling & requirement based on Check Type
     function togglePortRequired() {
@@ -226,19 +266,27 @@ require_once __DIR__ . '/layout/header.php';
             const resultDevices = await resDevices.json();
             if (resultDevices.success) {
                 devicesData = resultDevices.data;
+                // Clear selection if some devices no longer exist
+                const validIds = new Set(devicesData.map(d => d.id));
+                selectedDevices = new Set([...selectedDevices].filter(id => validIds.has(id)));
                 renderDevices();
             } else {
-                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-500">Error: ${resultDevices.error}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-red-500">Error: ${resultDevices.error}</td></tr>`;
             }
         } catch (err) {
-            tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-500">Error fetching data.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-red-500">Error fetching data.</td></tr>`;
         }
     }
 
-    // Populate group select dropdown in modal
+    // Populate group select dropdown in modal and bulk action bar
     function populateGroupSelect() {
         const select = document.getElementById('deviceGroupId');
         select.innerHTML = '<option value="">-- Tanpa Grup --</option>' + 
+            groupsData.map(g => `<option value="${g.id}">${escapeHtml(g.group_name)}</option>`).join('');
+            
+        const bulkSelect = document.getElementById('bulkGroupSelect');
+        bulkSelect.innerHTML = '<option value="">-- Pindahkan ke Grup --</option>' + 
+            '<option value="none">Tanpa Grup</option>' +
             groupsData.map(g => `<option value="${g.id}">${escapeHtml(g.group_name)}</option>`).join('');
     }
 
@@ -248,8 +296,9 @@ require_once __DIR__ . '/layout/header.php';
         const pagination = document.getElementById('paginationContainer');
         
         if (devicesData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500">Belum ada perangkat yang terdaftar.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-10 text-center text-gray-500">Belum ada perangkat yang terdaftar.</td></tr>`;
             if (pagination) pagination.innerHTML = '';
+            updateBulkActionsBar();
             return;
         }
         
@@ -278,13 +327,55 @@ require_once __DIR__ . '/layout/header.php';
             const checkTypeFormatted = `<span class="uppercase font-semibold text-xs tracking-wider px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">${device.check_type}</span>`;
             
             return `
-                <tr class="hover:bg-gray-50/55 dark:hover:bg-gray-800/30 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800 dark:text-white">${escapeHtml(device.name)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">${groupName}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500 dark:text-gray-400">${escapeHtml(device.ip_address)}${portText}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">${checkTypeFormatted}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">${statusBadge}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <tr class="flex flex-col md:table-row hover:bg-gray-50/55 dark:hover:bg-gray-800/30 transition-colors p-4 mb-4 bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-150 dark:border-gray-800 md:p-0 md:mb-0 md:border-none">
+                    <!-- Baris 1: Checkbox & Nama (kiri), Status (kanan) -->
+                    <td class="px-0 py-1 md:px-6 md:py-4 whitespace-nowrap block md:table-cell">
+                        <div class="flex items-center justify-between md:contents">
+                            <div class="flex items-center gap-2 md:hidden">
+                                <input type="checkbox" value="${device.id}" onchange="toggleSelectDevice(this, ${device.id})" ${selectedDevices.has(device.id) ? 'checked' : ''} class="device-checkbox h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-800 dark:bg-gray-900">
+                                <span class="text-sm font-bold text-gray-800 dark:text-white">${escapeHtml(device.name)}</span>
+                            </div>
+                            <div class="md:hidden">${statusBadge}</div>
+                            <!-- Desktop Only -->
+                            <input type="checkbox" value="${device.id}" onchange="toggleSelectDevice(this, ${device.id})" ${selectedDevices.has(device.id) ? 'checked' : ''} class="hidden md:inline group-checkbox h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-800 dark:bg-gray-900">
+                        </div>
+                    </td>
+                    <!-- Baris 2: Grup (kiri) & Tipe Cek (kanan) -->
+                    <td class="px-0 py-1 md:px-6 md:py-4 whitespace-nowrap block md:table-cell">
+                        <div class="flex items-center justify-between md:contents">
+                            <span class="text-xs text-gray-500 dark:text-gray-400 md:hidden flex items-center gap-1.5">
+                                <i class="fa-solid fa-folder text-gray-400 text-[10px]"></i>
+                                ${groupName}
+                            </span>
+                            <span class="md:hidden">${checkTypeFormatted}</span>
+                            <!-- Desktop Only -->
+                            <span class="hidden md:inline text-sm font-bold text-gray-800 dark:text-white">${escapeHtml(device.name)}</span>
+                        </div>
+                    </td>
+                    <!-- Baris 3: IP/Host (kiri) & Aksi (kanan) -->
+                    <td class="px-0 py-1.5 md:px-6 md:py-4 whitespace-nowrap block md:table-cell">
+                        <div class="flex items-center justify-between md:contents">
+                            <span class="text-xs font-mono text-gray-500 dark:text-gray-400 md:hidden flex items-center gap-1.5">
+                                <i class="fa-solid fa-link text-gray-400 text-[10px]"></i>
+                                ${escapeHtml(device.ip_address)}${portText}
+                            </span>
+                            <div class="flex gap-1 md:hidden">
+                                <button onclick="openDeviceModal('update', ${device.id})" class="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition-colors" title="Edit Perangkat">
+                                    <i class="fa-solid fa-pen-to-square text-sm"></i>
+                                </button>
+                                <button onclick="confirmDelete(${device.id})" class="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors" title="Hapus Perangkat">
+                                    <i class="fa-solid fa-trash text-sm"></i>
+                                </button>
+                            </div>
+                            <!-- Desktop Only -->
+                            <span class="hidden md:inline text-sm text-gray-800 dark:text-gray-200">${groupName}</span>
+                        </div>
+                    </td>
+                    <!-- Desktop-only columns -->
+                    <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500 dark:text-gray-400">${escapeHtml(device.ip_address)}${portText}</td>
+                    <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm">${checkTypeFormatted}</td>
+                    <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm">${statusBadge}</td>
+                    <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex justify-end gap-2">
                             <button onclick="openDeviceModal('update', ${device.id})" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition-colors" title="Edit Perangkat">
                                 <i class="fa-solid fa-pen-to-square text-base"></i>
@@ -299,11 +390,65 @@ require_once __DIR__ . '/layout/header.php';
         }).join('');
         
         renderPagination(totalItems, totalPages, currentPage, itemsPerPage, 'paginationContainer', changePage, 'perangkat');
+        updateSelectAllHeader();
+        updateBulkActionsBar();
     }
 
     function changePage(page) {
         currentPage = page;
         renderDevices();
+    }
+
+    // Checkbox selection functions
+    function toggleSelectDevice(el, id) {
+        if (el.checked) {
+            selectedDevices.add(id);
+        } else {
+            selectedDevices.delete(id);
+        }
+        updateBulkActionsBar();
+        updateSelectAllHeader();
+    }
+
+    function toggleSelectAllDevices(el) {
+        const pageCheckboxes = document.querySelectorAll('.device-checkbox');
+        pageCheckboxes.forEach(cb => {
+            const id = parseInt(cb.value);
+            cb.checked = el.checked;
+            if (el.checked) {
+                selectedDevices.add(id);
+            } else {
+                selectedDevices.delete(id);
+            }
+        });
+        updateBulkActionsBar();
+    }
+
+    function updateSelectAllHeader() {
+        const pageCheckboxes = document.querySelectorAll('.device-checkbox');
+        const selectAllHeader = document.getElementById('selectAllDevices');
+        if (pageCheckboxes.length === 0) {
+            if (selectAllHeader) selectAllHeader.checked = false;
+            return;
+        }
+        let allChecked = true;
+        pageCheckboxes.forEach(cb => {
+            if (!cb.checked) allChecked = false;
+        });
+        if (selectAllHeader) selectAllHeader.checked = allChecked;
+    }
+
+    function updateBulkActionsBar() {
+        const bar = document.getElementById('bulkActionsBar');
+        const countEl = document.getElementById('selectedCount');
+        if (selectedDevices.size > 0) {
+            bar.classList.remove('hidden');
+            countEl.textContent = selectedDevices.size;
+        } else {
+            bar.classList.add('hidden');
+            const selectAllHeader = document.getElementById('selectAllDevices');
+            if (selectAllHeader) selectAllHeader.checked = false;
+        }
     }
 
     // Modal Operations
@@ -423,6 +568,85 @@ require_once __DIR__ . '/layout/header.php';
             }
         } catch (err) {
             closeDeleteModal();
+            showAlert('Gagal menghubungi server.', 'danger');
+        }
+    }
+
+    // Bulk Delete Operations
+    function confirmBulkDelete() {
+        if (selectedDevices.size === 0) return;
+        const modal = document.getElementById('bulkDeleteModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.firstElementChild.classList.remove('scale-95'), 50);
+        
+        document.getElementById('confirmBulkDeleteBtn').onclick = executeBulkDelete;
+    }
+
+    function closeBulkDeleteModal() {
+        const modal = document.getElementById('bulkDeleteModal');
+        modal.firstElementChild.classList.add('scale-95');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+
+    async function executeBulkDelete() {
+        const formData = new FormData();
+        const idsArray = Array.from(selectedDevices);
+        idsArray.forEach(id => formData.append('ids[]', id));
+        
+        try {
+            const res = await fetch('<?php echo $baseUrl; ?>api/devices.php?action=bulk_delete', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+            
+            closeBulkDeleteModal();
+            
+            if (result.success) {
+                showAlert(result.message);
+                selectedDevices.clear();
+                loadData();
+            } else {
+                showAlert(result.error, 'danger');
+            }
+        } catch (err) {
+            closeBulkDeleteModal();
+            showAlert('Gagal menghubungi server.', 'danger');
+        }
+    }
+
+    // Bulk Update Group Operations
+    async function executeBulkUpdateGroup() {
+        if (selectedDevices.size === 0) return;
+        const groupSelect = document.getElementById('bulkGroupSelect');
+        const groupId = groupSelect.value;
+        
+        if (groupId === '') {
+            showAlert('Harap pilih grup tujuan terlebih dahulu.', 'danger');
+            return;
+        }
+        
+        const formData = new FormData();
+        const idsArray = Array.from(selectedDevices);
+        idsArray.forEach(id => formData.append('ids[]', id));
+        formData.append('group_id', groupId);
+        
+        try {
+            const res = await fetch('<?php echo $baseUrl; ?>api/devices.php?action=bulk_update_group', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+            
+            if (result.success) {
+                showAlert(result.message);
+                selectedDevices.clear();
+                groupSelect.value = ''; // Reset select dropdown
+                loadData();
+            } else {
+                showAlert(result.error, 'danger');
+            }
+        } catch (err) {
             showAlert('Gagal menghubungi server.', 'danger');
         }
     }

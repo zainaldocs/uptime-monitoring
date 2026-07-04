@@ -153,3 +153,78 @@ function sendAlertEmail(array $device, ?float $latency): bool {
         return false;
     }
 }
+
+/**
+ * Sends a recovery email when a device goes back UP.
+ * 
+ * @param array $device The device row data from db.
+ * @param float|null $latency The latency recorded when it recovered.
+ * @return bool
+ */
+function sendRecoveryEmail(array $device, ?float $latency): bool {
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("SELECT setting_value FROM system_settings WHERE setting_key = 'alert_target_email'");
+        $stmt->execute();
+        $targetEmail = $stmt->fetchColumn();
+        
+        if (!$targetEmail) {
+            error_log("No alert target email configured. Recovery alert skipped.");
+            return false;
+        }
+        
+        $deviceName = htmlspecialchars($device['name']);
+        $deviceIp = htmlspecialchars($device['ip_address']);
+        $devicePort = $device['port'] ? ":" . $device['port'] : "";
+        $checkType = strtoupper($device['check_type']);
+        $timestamp = date('Y-m-d H:i:s');
+        $latencyText = $latency !== null ? "{$latency} ms" : "N/A";
+        
+        $subject = "✅ [RECOVERY UMS] Perangkat UP: $deviceName";
+        
+        $htmlBody = "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #f3f4f6; border-radius: 12px; background-color: #fcfcfc;'>
+            <div style='background-color: #10b981; color: white; padding: 15px 20px; border-radius: 8px 8px 0 0; text-align: center;'>
+                <h2 style='margin: 0; font-size: 20px;'>✅ Pulih: Perangkat Kembali Online!</h2>
+            </div>
+            <div style='padding: 20px; color: #374151;'>
+                <p>Sistem mendeteksi bahwa perangkat pemantauan Anda kini telah kembali aktif dan berstatus <b>UP</b>.</p>
+                <table style='width: 100%; border-collapse: collapse; margin-top: 15px;'>
+                    <tr>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-weight: bold; width: 40%;'>Nama Perangkat</td>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #f3f4f6; color: #111827;'>$deviceName</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-weight: bold;'>IP / Host</td>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-family: monospace; color: #111827;'>$deviceIp$devicePort</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-weight: bold;'>Tipe Cek</td>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #f3f4f6; color: #111827;'>$checkType</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-weight: bold;'>Rata Latency</td>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #f3f4f6; color: #111827;'>$latencyText</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-weight: bold;'>Waktu Kejadian</td>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #f3f4f6; color: #111827;'>$timestamp</td>
+                    </tr>
+                </table>
+                <p style='margin-top: 20px; text-align: center;'>
+                    <a href='" . APP_URL . "views/dashboard.php' style='display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;'>Buka Dashboard UMS</a>
+                </p>
+            </div>
+            <div style='border-top: 1px solid #f3f4f6; padding-top: 15px; text-align: center; font-size: 11px; color: #9ca3af;'>
+                Pesan otomatis dikirim oleh Uptime Monitoring System (UMS) Pro.
+            </div>
+        </div>
+        ";
+        
+        return sendEmail($targetEmail, $subject, $htmlBody);
+        
+    } catch (PDOException $e) {
+        error_log("Database error triggering recovery email: " . $e->getMessage());
+        return false;
+    }
+}
